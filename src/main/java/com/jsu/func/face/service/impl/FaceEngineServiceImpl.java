@@ -1,16 +1,11 @@
 package com.jsu.func.face.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.arcsoft.face.*;
 import com.arcsoft.face.enums.ImageFormat;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.jsu.func.face.base.ImageInfo;
-import com.jsu.func.face.dao.mapper.UserFaceInfoMapper;
-import com.jsu.func.face.domain.UserFaceInfo;
 import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
 import com.jsu.func.face.factory.FaceEngineFactory;
@@ -53,9 +48,6 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     private LoadingCache<Integer, List<FaceUserInfo>> faceGroupCache;
 
-    @Autowired
-    private UserFaceInfoMapper userFaceInfoMapper;
-
     private GenericObjectPool<FaceEngine> extractFaceObjectPool;
     private GenericObjectPool<FaceEngine> compareFaceObjectPool;
 
@@ -64,7 +56,6 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     @PostConstruct
     public void init() {
-        initCache();
         executorService = Executors.newFixedThreadPool(threadPoolSize);
         GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
         poolConfig.setMaxIdle(threadPoolSize);
@@ -76,32 +67,6 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     }
 
-    /**
-     * 初始化缓存
-     */
-    private void initCache() {
-        this.faceGroupCache = CacheBuilder
-                .newBuilder()
-                .maximumSize(100)
-                .expireAfterAccess(2, TimeUnit.HOURS)
-                .build(new CacheLoader<Integer, List<FaceUserInfo>>() {
-                    @Override
-                    public List<FaceUserInfo> load(Integer groupId) throws Exception {
-                        UserFaceInfo userFaceInfo = new UserFaceInfo();
-                        userFaceInfo.setGroupId(groupId);
-                        List<UserFaceInfo> userFaceInfoList = userFaceInfoMapper.selectList(userFaceInfo);
-
-                        List<FaceUserInfo> userFaceInfoListTarget = Lists.newLinkedList();
-                        userFaceInfoList.forEach(k -> {
-                            FaceUserInfo info = new FaceUserInfo();
-                            BeanUtil.copyProperties(k, info);
-                            userFaceInfoListTarget.add(info);
-                        });
-
-                        return userFaceInfoListTarget;
-                    }
-                });
-    }
 
 
     private int plusHundred(Float value) {

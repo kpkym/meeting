@@ -1,11 +1,9 @@
 package com.jsu.func.login.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 
@@ -78,8 +76,4 @@ public class User implements Serializable {
      * 参与次数
      */
     private Integer participateNum;
-
-
-    @TableField(exist = false)
-    MultipartFile file;
 }

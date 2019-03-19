@@ -14,8 +14,6 @@ import com.jsu.func.face.util.ImageUtil;
 import com.jsu.func.login.entity.User;
 import com.jsu.func.login.service.IUserService;
 import com.jsu.util.Msg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +32,6 @@ import java.util.List;
 
 @RestController
 public class FaceController {
-    public final static Logger logger = LoggerFactory.getLogger(FaceController.class);
     @Autowired
     FaceEngineService faceEngineService;
 
@@ -42,13 +39,13 @@ public class FaceController {
     IUserService userService;
 
     @PostMapping("/register")
-    public Msg register(User user) {
+    public Msg register(User user, MultipartFile file) {
         try {
-            if (user.getFile() == null) {
+            if (file == null) {
                 return Msg.failure("文件为空");
             }
 
-            InputStream inputStream = user.getFile().getInputStream();
+            InputStream inputStream = file.getInputStream();
             ImageInfo imageInfo = ImageUtil.getRGBData(inputStream);
 
             //人脸特征获取
@@ -61,7 +58,6 @@ public class FaceController {
             userService.save(user);
             return Msg.success();
         } catch (Exception e) {
-            logger.error("", e);
         }
         throw new UserExceptJSON("未知错误");
     }
