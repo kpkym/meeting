@@ -15,6 +15,7 @@ import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
 import com.jsu.func.face.factory.FaceEngineFactory;
 import com.jsu.func.face.service.FaceEngineService;
+import com.jsu.func.login.service.IUserService;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -56,6 +58,9 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     private GenericObjectPool<FaceEngine> extractFaceObjectPool;
     private GenericObjectPool<FaceEngine> compareFaceObjectPool;
+
+    @Autowired
+    IUserService userService;
 
     @PostConstruct
     public void init() {
@@ -106,17 +111,6 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     }
 
-    /***
-     * 加载人脸数据至缓存
-     */
-    
-    @Override
-    public void addFaceToCache(Integer groupId, FaceUserInfo faceUserInfo) 
-    		throws ExecutionException {
-        List<FaceUserInfo> userFaceInfoList = faceGroupCache.get(groupId);
-        userFaceInfoList.add(faceUserInfo);
-    }
-    
     /***
      * 人脸识别
      */
@@ -232,16 +226,20 @@ public class FaceEngineServiceImpl implements FaceEngineService {
      *特征匹配 
      */
     @Override
-    public List<FaceUserInfo> compareFaceFeature(byte[] faceFeature, Integer groupId)
+    public List<FaceUserInfo> compareFaceFeature(byte[] faceFeature)
     		throws InterruptedException, ExecutionException {
         List<FaceUserInfo> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
 
         FaceFeature targetFaceFeature = new FaceFeature();
         targetFaceFeature.setFeatureData(faceFeature);
-        List<FaceUserInfo> faceInfoList = faceGroupCache.get(groupId);//从缓存中提取人脸库
+        List<FaceUserInfo> faceInfoList = userService.list().stream().map(e -> {
+            FaceUserInfo f = new FaceUserInfo();
+            f.setFaceFeature(e.getFace());
+            return f;
+        }).collect(Collectors.toList());
 
         List<List<FaceUserInfo>> faceUserInfoPartList = Lists.partition(faceInfoList, 1000);//分成1000一组，多线程处理
-        CompletionService<List<FaceUserInfo>> completionService = new ExecutorCompletionService(executorService);
+        CompletionService<List<FaceUserInfo>> completionService = new ExecutorCompletionService<>(executorService);
         for (List<FaceUserInfo> part : faceUserInfoPartList) {
             completionService.submit(new CompareFaceTask(part, targetFaceFeature));
         }

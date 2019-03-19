@@ -11,9 +11,6 @@ import java.util.concurrent.ExecutionException;
 
 public interface FaceEngineService {
 
-    void addFaceToCache(Integer groupId, FaceUserInfo userFaceInfo) throws ExecutionException;
-
-
     List<FaceInfo> detectFaces(ImageInfo imageInfo);
 
     List<ProcessInfo> process(ImageInfo imageInfo);
@@ -27,11 +24,10 @@ public interface FaceEngineService {
 
     /**
      * 人脸比对
-     * @param groupId
      * @param faceFeature
      * @return
      */
-    List<FaceUserInfo> compareFaceFeature(byte[] faceFeature, Integer groupId) throws InterruptedException, ExecutionException;
+    List<FaceUserInfo> compareFaceFeature(byte[] faceFeature) throws InterruptedException, ExecutionException;
 
 
 
