@@ -1,13 +1,10 @@
-package draw;
+package com.jsu.util.socket;
 
-import com.jsu.util.t.TheadServer;
-
-import javax.swing.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 
 @SuppressWarnings("serial")
-public class SocketServer extends JFrame{
+public class SocketServer{
     /**
      * @param args
      * @throws IOException

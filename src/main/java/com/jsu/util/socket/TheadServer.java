@@ -1,13 +1,11 @@
-package com.jsu.util.t;
+package com.jsu.util.socket;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
+import java.util.Base64;
 
 
 public class TheadServer implements Runnable {
@@ -15,19 +13,17 @@ public class TheadServer implements Runnable {
     public InputStream ins;
 
     public TheadServer(ServerSocket ss ) throws IOException {
-
-        System.out.println("start thread");
         this.s=ss.accept();
-        /*读入流数据，并转成BufferImage类型*/
         ins = s.getInputStream();
-        BufferedImage bi = ImageIO.read(ins);
-        File file = new File("/Users/kpkym/images/" + new Date().getTime() + ".jpg");
-        if (!file.exists()) {
-            file.mkdirs();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[16384];
+        while ((nRead = ins.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
         }
-        if(ImageIO.write(bi, "jpg", file)){
-            System.out.printf("save picture success!\n");
-        }
+        String encodedFile = Base64.getEncoder().encodeToString(buffer.toByteArray());
+        encodedFile = "data:image/png;base64," + encodedFile;
+        System.out.println(encodedFile);
         ins.close();
     }
     @Override
