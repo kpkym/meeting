@@ -1,13 +1,10 @@
 package com.jsu.func.face.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.arcsoft.face.FaceInfo;
 import com.jsu.except.UserExceptJSON;
 import com.jsu.func.face.base.ImageInfo;
-import com.jsu.func.face.dto.FaceSearchResDto;
-import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
 import com.jsu.func.face.service.FaceEngineService;
 import com.jsu.func.face.util.ImageUtil;
@@ -79,12 +76,10 @@ public class FaceController {
             throw new UserExceptJSON("未检出到人脸");
         }
         //人脸比对，获取比对结果
-        List<FaceUserInfo> userFaceInfoList = faceEngineService.compareFaceFeature(bytes);
+        List<User> userFaceInfoList = faceEngineService.compareFaceFeature(bytes);
 
         if (CollectionUtil.isNotEmpty(userFaceInfoList)) {
-            FaceUserInfo faceUserInfo = userFaceInfoList.get(0);
-            FaceSearchResDto faceSearchResDto = new FaceSearchResDto();
-            BeanUtil.copyProperties(faceUserInfo, faceSearchResDto);
+            User faceSearchResDto = userFaceInfoList.get(0);
             List<ProcessInfo> processInfoList = faceEngineService.process(imageInfo);
             if (CollectionUtil.isNotEmpty(processInfoList)) {
                 //人脸检测

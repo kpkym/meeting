@@ -10,6 +10,7 @@ import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
 import com.jsu.func.face.factory.FaceEngineFactory;
 import com.jsu.func.face.service.FaceEngineService;
+import com.jsu.func.login.entity.User;
 import com.jsu.func.login.service.IUserService;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -24,7 +25,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -191,26 +191,24 @@ public class FaceEngineServiceImpl implements FaceEngineService {
      *特征匹配 
      */
     @Override
-    public List<FaceUserInfo> compareFaceFeature(byte[] faceFeature)
+    public List<User> compareFaceFeature(byte[] faceFeature)
     		throws InterruptedException, ExecutionException {
-        List<FaceUserInfo> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
+        List<User> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
 
         FaceFeature targetFaceFeature = new FaceFeature();
         targetFaceFeature.setFeatureData(faceFeature);
-        List<FaceUserInfo> faceInfoList = userService.list().stream().map(e -> {
-            FaceUserInfo f = new FaceUserInfo();
-            f.setFaceFeature(e.getFace());
-            return f;
-        }).collect(Collectors.toList());
 
-        List<List<FaceUserInfo>> faceUserInfoPartList = Lists.partition(faceInfoList, 1000);//分成1000一组，多线程处理
-        CompletionService<List<FaceUserInfo>> completionService = new ExecutorCompletionService<>(executorService);
-        for (List<FaceUserInfo> part : faceUserInfoPartList) {
+        List<User> users = userService.list();
+
+
+        List<List<User>> faceUserInfoPartList = Lists.partition(users, 1000);//分成1000一组，多线程处理
+        CompletionService<List<User>> completionService = new ExecutorCompletionService<>(executorService);
+        for (List<User> part : faceUserInfoPartList) {
             completionService.submit(new CompareFaceTask(part, targetFaceFeature));
         }
         for (int i = 0; i < faceUserInfoPartList.size(); i++) {
-            List<FaceUserInfo> faceUserInfoList = completionService.take().get();
-            if (CollectionUtil.isNotEmpty(faceInfoList)) {
+            List<User> faceUserInfoList = completionService.take().get();
+            if (CollectionUtil.isNotEmpty(users)) {
                 resultFaceInfoList.addAll(faceUserInfoList);
             }
         }
@@ -221,36 +219,32 @@ public class FaceEngineServiceImpl implements FaceEngineService {
     }
 
 
-    private class CompareFaceTask implements Callable<List<FaceUserInfo>> {
+    private class CompareFaceTask implements Callable<List<User>> {
 
-        private List<FaceUserInfo> faceUserInfoList;
+        private List<User> faceUserInfoList;
         private FaceFeature targetFaceFeature;
 
 
-        public CompareFaceTask(List<FaceUserInfo> faceUserInfoList, FaceFeature targetFaceFeature) {
+        public CompareFaceTask(List<User> faceUserInfoList, FaceFeature targetFaceFeature) {
             this.faceUserInfoList = faceUserInfoList;
             this.targetFaceFeature = targetFaceFeature;
         }
 
         @Override
-        public List<FaceUserInfo> call() throws Exception {
+        public List<User> call() throws Exception {
             FaceEngine faceEngine = null;
-            List<FaceUserInfo> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
+            List<User> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
             try {
                 faceEngine = compareFaceObjectPool.borrowObject();
-                for (FaceUserInfo faceUserInfo : faceUserInfoList) {
+                for (User faceUserInfo : faceUserInfoList) {
                     FaceFeature sourceFaceFeature = new FaceFeature();
-                    sourceFaceFeature.setFeatureData(faceUserInfo.getFaceFeature());
+                    sourceFaceFeature.setFeatureData(faceUserInfo.getFace());
                     FaceSimilar faceSimilar = new FaceSimilar();
                     faceEngine.compareFaceFeature(targetFaceFeature, sourceFaceFeature, faceSimilar);
                     Integer similarValue = plusHundred(faceSimilar.getScore());//获取相似值
                     if (similarValue > passRate) {//相似值大于配置预期，加入到识别到人脸的列表
-
-                        FaceUserInfo info = new FaceUserInfo();
-                        info.setName(faceUserInfo.getName());
-                        info.setFaceId(faceUserInfo.getFaceId());
-                        info.setSimilarValue(similarValue);
-                        resultFaceInfoList.add(info);
+                        faceUserInfo.setSimilarValue(similarValue);
+                        resultFaceInfoList.add(faceUserInfo);
                     }
                 }
             } catch (Exception e) {

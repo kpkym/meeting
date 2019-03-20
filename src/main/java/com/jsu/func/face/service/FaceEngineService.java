@@ -2,8 +2,8 @@ package com.jsu.func.face.service;
 
 import com.arcsoft.face.FaceInfo;
 import com.jsu.func.face.base.ImageInfo;
-import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
+import com.jsu.func.login.entity.User;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +27,7 @@ public interface FaceEngineService {
      * @param faceFeature
      * @return
      */
-    List<FaceUserInfo> compareFaceFeature(byte[] faceFeature) throws InterruptedException, ExecutionException;
+    List<User> compareFaceFeature(byte[] faceFeature) throws InterruptedException, ExecutionException;
 
 
 
