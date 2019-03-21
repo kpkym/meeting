@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Msg login(@RequestBody User user, HttpSession session) {
+    public Msg login(User user, HttpSession session) {
         log.debug(session.getId());
         User login = service.login(user);
 

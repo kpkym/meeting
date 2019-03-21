@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.jsu.func.login.entity.User;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -45,11 +46,13 @@ public class Meeting implements Serializable {
     /**
      * 开始时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm")
     private Date start;
 
     /**
      * 结束时间
      */
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm")
     private Date end;
 
     /**

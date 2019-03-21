@@ -15,6 +15,7 @@ public class SocketServer{
         ServerSocket ss = new ServerSocket(9393);
         System.out.println("begin");
 
+
         while(true){
             new Thread(new TheadServer(ss)).start();
         }

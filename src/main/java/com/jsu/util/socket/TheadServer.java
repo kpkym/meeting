@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Base64;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 
 public class TheadServer implements Runnable {
@@ -15,15 +17,20 @@ public class TheadServer implements Runnable {
     public TheadServer(ServerSocket ss ) throws IOException {
         this.s=ss.accept();
         ins = s.getInputStream();
+
+        InputStream is = ins;
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
         int nRead;
         byte[] data = new byte[16384];
-        while ((nRead = ins.read(data, 0, data.length)) != -1) {
+
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
             buffer.write(data, 0, nRead);
         }
-        String encodedFile = Base64.getEncoder().encodeToString(buffer.toByteArray());
-        encodedFile = "data:image/png;base64," + encodedFile;
-        System.out.println(encodedFile);
+
+
+        Files.write(Paths.get("myfile.txt"), buffer.toByteArray(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
         ins.close();
     }
     @Override

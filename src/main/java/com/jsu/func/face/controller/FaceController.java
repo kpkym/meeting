@@ -14,7 +14,6 @@ import com.jsu.util.Msg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -27,7 +26,7 @@ import java.io.InputStream;
 import java.util.List;
 
 
-@RestController
+// @RestController
 public class FaceController {
     @Autowired
     FaceEngineService faceEngineService;

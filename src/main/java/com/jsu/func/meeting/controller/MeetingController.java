@@ -41,7 +41,7 @@ public class MeetingController {
     MeetingUtil meetingUtil;
 
     @PostMapping("/meeting")
-    public Msg create(@RequestBody Meeting meeting, HttpSession session) {
+    public Msg create(Meeting meeting, HttpSession session) {
         meeting.setHost((Integer) SessionUtil.getUid(session));
 
         if (!service.save(meeting)) {
