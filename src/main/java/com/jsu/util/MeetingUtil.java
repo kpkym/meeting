@@ -1,5 +1,7 @@
 package com.jsu.util;
 
+import com.jsu.func.login.entity.User;
+import com.jsu.func.login.service.IUserService;
 import com.jsu.func.meeting.entity.Meeting;
 import com.jsu.func.meeting.entity.Room;
 import com.jsu.func.meeting.service.IMeetingService;
@@ -23,6 +25,13 @@ public class MeetingUtil {
     IMeetingService service;
     @Autowired
     IRoomService roomService;
+    @Autowired
+    IUserService userService;
+
+    public List<User> participants(String uids) {
+        Collection<User> users = userService.listByIds(Arrays.stream(uids.split("_")).map(Integer::valueOf).collect(Collectors.toList()));
+        return new ArrayList<>(users);
+    }
 
     public Map meetingTable(Date date) {
 
@@ -73,4 +82,5 @@ public class MeetingUtil {
         }
         meetings.sort(Comparator.comparing(Meeting::getStart));
     }
+
 }

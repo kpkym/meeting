@@ -5,6 +5,7 @@ import com.jsu.except.UserExceptJSON;
 import com.jsu.func.login.entity.User;
 import com.jsu.func.login.service.IUserService;
 import com.jsu.func.meeting.entity.Meeting;
+import com.jsu.func.meeting.entity.Room;
 import com.jsu.func.meeting.service.IMeetingService;
 import com.jsu.func.meeting.service.IRoomService;
 import com.jsu.util.MeetingUtil;
@@ -16,6 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,14 +56,12 @@ public class MeetingController {
     @GetMapping("/meeting")
     public Msg list(HttpSession session) {
         Object uid = SessionUtil.getUid(session);
-
         List<Meeting> collect = service.list().stream().filter(e -> e.getHost().equals(uid) || Arrays.asList(e.getUids().split("_")).contains(uid.toString()))
                 .peek(e -> {
                     e.setHoster(userService.getById(e.getHost()));
                     e.setRoom(roomService.getById(e.getRid()));
-
-                    Collection<User> users = userService.listByIds(Arrays.stream(e.getUids().split("_")).map(Integer::valueOf).collect(Collectors.toList()));
-                    e.setParticipants(new ArrayList<>(users));
+                    e.setParticipants(meetingUtil.participants(e.getUids()));
+                    e.getRoom().setImg("");
                 })
                 .collect(Collectors.toList());
         return Msg.success(collect);
@@ -73,7 +73,7 @@ public class MeetingController {
         meeting.setHoster(userService.getById(meeting.getHost()));
         meeting.setRoom(roomService.getById(meeting.getRid()));
 
-        Collection<User> users = userService.listByIds(Arrays.stream(meeting.getUids().split("_")).map(Integer::valueOf).collect(Collectors.toList()));
+        Collection<User> users = meetingUtil.participants(meeting.getUids());
         meeting.setParticipants(new ArrayList<>(users));
         return Msg.success(meeting);
     }
@@ -84,10 +84,30 @@ public class MeetingController {
         return Msg.success(map);
     }
 
-    @GetMapping("/ddd")
-    public Msg meetinTable(Date date) {
-        log.info(date.toString());
-        return Msg.success();
+    @GetMapping("/available")
+    public Msg available(@DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date start, @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date end) {
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        List<Meeting> collect = service.list().stream().filter(e -> fmt.format(start).equals(fmt.format(e.getStart())))
+                .collect(Collectors.toList());
+        List<Room> unAvaiableList = new ArrayList<>();
+
+        Iterator<Meeting> iterator = collect.iterator();
+        while (iterator.hasNext()) {
+            Meeting m = iterator.next();
+            if (start.after(m.getStart()) && start.before(m.getEnd()) || start.equals(m.getStart())) {
+                Room r = roomService.getById(m.getRid());
+                unAvaiableList.add(r);
+            } else if (end.after(m.getStart()) && end.before(m.getEnd()) || end.equals(m.getEnd())) {
+                Room r = roomService.getById(m.getRid());
+                unAvaiableList.add(r);
+            }
+        }
+
+        List<Room> rooms = roomService.list().stream().filter(e -> !unAvaiableList.contains(e))
+                .peek(e -> e.setImg(""))
+                .collect(Collectors.toList());
+
+        return Msg.success(rooms);
     }
 
 }
