@@ -34,7 +34,6 @@ public class UserServiceImplTest {
 
         String encodedFile = Base64.getEncoder().encodeToString(face);
         User build = User.builder()
-                .bbb(fileContent)
                 .build();
 
 
