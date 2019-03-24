@@ -1,6 +1,10 @@
 package com.jsu.config;
 
+import com.jsu.util.SessionUtil;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * @author kpkym
@@ -8,17 +12,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  */
 @ControllerAdvice
 public class GlobalTestConfig {
-    // @ModelAttribute
-    // public void initSession(HttpSession session) {
-    //     session.setAttribute("user",
-    //             User.builder()
-    //                     .username("testusername")
-    //                     .password("testpassword")
-    //                     .realName("张三")
-    //                     .identification("123456")
-    //                     .build()
-    //     );
-    //     session.setAttribute("uid", 1);
-    // }
+
+    @ModelAttribute
+    public void initSession(HttpSession session) {
+        SessionUtil.setUid(1, session);
+
+        session.setAttribute("uid", 1);
+    }
 
 }

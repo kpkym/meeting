@@ -39,17 +39,8 @@ public class Room implements Serializable {
     /**
      * 会议室规模
      */
-    private String scale;
+    private Integer scale;
 
-    /**
-     * 会议室座位
-     */
-    private Integer seats;
-
-    /**
-     * 是否有投影仪 0没有 1有
-     */
-    private Integer projector;
 
     private String img;
 

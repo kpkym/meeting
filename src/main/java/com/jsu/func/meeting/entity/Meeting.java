@@ -3,6 +3,7 @@ package com.jsu.func.meeting.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.jsu.func.login.entity.User;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -26,7 +27,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Meeting implements Serializable {
+public class Meeting implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
@@ -66,6 +67,12 @@ public class Meeting implements Serializable {
      * 会议参与者
      */
     private String uids;
+
+    /**
+     * 逻辑未删除值(默认为 0) 逻辑已删除值(默认为 1)
+     */
+    @TableLogic
+    private Integer deleted;
 
     /////////////////////////
     @TableField(exist=false)

@@ -61,7 +61,9 @@ public class User implements Serializable {
     /**
      * 脸部数据
      */
-    private byte[] face;
+    private String face;
+
+    private byte[] bbb;
 
     /**
      * 签到次数

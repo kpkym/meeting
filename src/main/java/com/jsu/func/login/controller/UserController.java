@@ -29,6 +29,11 @@ public class UserController {
     @Autowired
     IUserService service;
 
+    @GetMapping("/getId")
+    public Msg getId(HttpSession session) {
+        return Msg.success(SessionUtil.getUid(session));
+    }
+
     @GetMapping("/users/{id}")
     public Msg get(@PathVariable Integer id) {
         return Msg.success(service.getById(id));
@@ -60,14 +65,6 @@ public class UserController {
     @GetMapping("/logout")
     public Msg logout(HttpSession session) {
         session.invalidate();
-        return Msg.success();
-    }
-
-    @GetMapping("/open")
-    public Msg open(String face) {
-        if (!face.equals("abcd")) {
-            throw new UserExceptJSON("错误脸部数据");
-        }
         return Msg.success();
     }
 }

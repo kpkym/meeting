@@ -238,7 +238,7 @@ public class FaceEngineServiceImpl implements FaceEngineService {
                 faceEngine = compareFaceObjectPool.borrowObject();
                 for (User faceUserInfo : faceUserInfoList) {
                     FaceFeature sourceFaceFeature = new FaceFeature();
-                    sourceFaceFeature.setFeatureData(faceUserInfo.getFace());
+                    // sourceFaceFeature.setFeatureData(faceUserInfo.getFace());
                     FaceSimilar faceSimilar = new FaceSimilar();
                     faceEngine.compareFaceFeature(targetFaceFeature, sourceFaceFeature, faceSimilar);
                     Integer similarValue = plusHundred(faceSimilar.getScore());//获取相似值

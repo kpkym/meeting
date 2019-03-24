@@ -1,20 +1,18 @@
 package com.jsu;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URLConnection;
-import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.Date;
 
 /**
  * @author kpkym
  * Date: 2019-03-16 15:54
  */
+@Slf4j
 public class Simple {
     @Test
     public void a() throws ParseException {
@@ -32,13 +30,9 @@ public class Simple {
 
     @Test
     public void base() throws IOException {
-        File file = new File("_012.jpg");
-        byte[] bytes = Files.readAllBytes(file.toPath());
-        String encodedFile = Base64.getEncoder().encodeToString(bytes);
+        // File file = new File("_012.jpg");
 
-        encodedFile = "data:" + URLConnection.guessContentTypeFromName(file.getName()) + ";base64," + encodedFile;
-        System.out.println(encodedFile);
-
+        log.info("啊");
     }
 
 }

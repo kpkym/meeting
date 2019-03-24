@@ -49,7 +49,7 @@ public class FaceController {
             if (bytes == null) {
                 throw new UserExceptJSON("未检出到人脸");
             }
-            user.setFace(bytes);
+            // user.setFace(bytes);
             //人脸特征插入到数据库
             userService.save(user);
             return Msg.success();

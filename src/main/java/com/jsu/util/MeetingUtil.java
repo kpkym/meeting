@@ -59,7 +59,7 @@ public class MeetingUtil {
         Calendar instance = Calendar.getInstance();
         instance.setTime(date);
 
-        for (int i = 9; i < 19; i++) {
+        for (int i = 7; i < 23; i++) {
             boolean flag = false;
             instance.set(Calendar.MINUTE, 30);
             instance.set(Calendar.HOUR_OF_DAY, i);

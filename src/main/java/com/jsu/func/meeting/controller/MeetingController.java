@@ -46,9 +46,8 @@ public class MeetingController {
     public Msg create(Meeting meeting, HttpSession session) {
         meeting.setHost((Integer) SessionUtil.getUid(session));
 
-        if (!service.save(meeting)) {
-            throw new UserExceptJSON("该时间段存在会议安排");
-        }
+        service.save(meeting);
+
 
         return Msg.success();
     }
@@ -61,7 +60,7 @@ public class MeetingController {
                     e.setHoster(userService.getById(e.getHost()));
                     e.setRoom(roomService.getById(e.getRid()));
                     e.setParticipants(meetingUtil.participants(e.getUids()));
-                    e.getRoom().setImg("");
+                    // e.getRoom().setImg("");
                 })
                 .collect(Collectors.toList());
         return Msg.success(collect);
@@ -81,8 +80,10 @@ public class MeetingController {
     @GetMapping("/meetingTable")
     public Msg meetingTable(@DateTimeFormat(pattern="yyyy-MM-dd") Date date) {
         Map map = meetingUtil.meetingTable(date);
+        System.out.println("是是是");
         return Msg.success(map);
     }
+
 
     @GetMapping("/available")
     public Msg available(@DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date start, @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date end) {
@@ -91,9 +92,7 @@ public class MeetingController {
                 .collect(Collectors.toList());
         List<Room> unAvaiableList = new ArrayList<>();
 
-        Iterator<Meeting> iterator = collect.iterator();
-        while (iterator.hasNext()) {
-            Meeting m = iterator.next();
+        for (Meeting m : collect) {
             if (start.after(m.getStart()) && start.before(m.getEnd()) || start.equals(m.getStart())) {
                 Room r = roomService.getById(m.getRid());
                 unAvaiableList.add(r);
@@ -110,4 +109,19 @@ public class MeetingController {
         return Msg.success(rooms);
     }
 
+    @DeleteMapping("/meeting/{id}")
+    public Msg delete(@PathVariable Integer id) {
+        service.removeById(id);
+        return Msg.success();
+    }
+
+    @PutMapping("/meeting")
+    public Msg update(Meeting meeting, HttpSession session) {
+        meeting.setHost((Integer) SessionUtil.getUid(session));
+        if (!service.updateById(meeting)) {
+            throw new UserExceptJSON("该时间段存在会议安排");
+        }
+
+        return Msg.success();
+    }
 }
