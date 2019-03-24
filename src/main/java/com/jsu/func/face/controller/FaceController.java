@@ -14,6 +14,7 @@ import com.jsu.util.Msg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -23,10 +24,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 
 
-// @RestController
+@RestController
 public class FaceController {
     @Autowired
     FaceEngineService faceEngineService;
@@ -35,34 +37,39 @@ public class FaceController {
     IUserService userService;
 
     @PostMapping("/register")
-    public Msg register(User user, MultipartFile file) {
-        try {
+    public Msg register(User user, MultipartFile file) throws IOException, InterruptedException {
             if (file == null) {
                 return Msg.failure("文件为空");
             }
+        InputStream inputStream = file.getInputStream();
 
-            InputStream inputStream = file.getInputStream();
-            ImageInfo imageInfo = ImageUtil.getRGBData(inputStream);
+        String s = Base64.getEncoder().encodeToString(file.getBytes());
 
-            //人脸特征获取
+        ImageInfo imageInfo = ImageUtil.getRGBData(inputStream);
+
+        //人脸特征获取
             byte[] bytes = faceEngineService.extractFaceFeature(imageInfo);
             if (bytes == null) {
                 throw new UserExceptJSON("未检出到人脸");
             }
-            // user.setFace(bytes);
+        try {
+            user.setFace(bytes);
             //人脸特征插入到数据库
             userService.save(user);
             return Msg.success();
         } catch (Exception e) {
+            e.printStackTrace();
         }
+
+
         throw new UserExceptJSON("未知错误");
     }
 
     @PostMapping("/faceSearch")
-    public Msg faceSearch(MultipartFile file)
+    public Msg faceSearch(String face)
     		throws Exception {
 
-        InputStream inputStream = file.getInputStream();
+        InputStream inputStream = new ByteArrayInputStream(Base64Utils.decodeFromString(face.trim()));
         BufferedImage bufImage = ImageIO.read(inputStream);
         ImageInfo imageInfo = ImageUtil.bufferedImage2ImageInfo(bufImage);
         if (inputStream != null) {
@@ -97,7 +104,7 @@ public class FaceController {
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 ImageIO.write(bufImage, "jpg", outputStream);
                 byte[] bytes1 = outputStream.toByteArray();
-                faceSearchResDto.setImage("data:image/jpeg;base64," + Base64Utils.encodeToString(bytes1));
+                faceSearchResDto.setImage("data:face/jpeg;base64," + Base64Utils.encodeToString(bytes1));
                 faceSearchResDto.setAge(processInfoList.get(0).getAge());
                 faceSearchResDto.setGender(processInfoList.get(0).getGender().equals(1) ? "女" : "男");
             }
