@@ -1,4 +1,4 @@
-package com.jsu.interval;
+package com.jsu.util;
 
 import com.jsu.func.meeting.entity.Meeting;
 import com.jsu.func.meeting.service.IMeetingService;
@@ -10,14 +10,14 @@ import java.util.List;
 
 
 @Component
-public class Main {
+public class Dispatcher {
     @Autowired
     IMeetingService meetingService;
-    List<Meeting> arrNow;
+
+    static List<Meeting> arrNow;
 
     public void addMeeting(Meeting meeting) {
         arrNow.add(meeting);
-
         Collections.sort(arrNow, (a, b) -> {
                 if (a.getEnd().after(b.getEnd())) {
                     return 1;
@@ -31,10 +31,13 @@ public class Main {
                     return -1;
                 }
         });
-
         //把申请按结束时间升排序，结束时间相同按开始时间降排序
-
         Comparison(arrNow);		//与原有数据进行比较，插入
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void Comparison(List<Meeting> arrNow) {
@@ -42,7 +45,6 @@ public class Main {
         List<Meeting> arrLast = meetingService.list();
 
         //查询取出原有数据
-
         for (int i=0; i<arrNow.size(); i++) {
             if (arrNow.get(i).getEnd().before(arrLast.get(0).getStart())) {
                 //若申请会议的结束时间大于第一个原有会议的开始时间，则插入

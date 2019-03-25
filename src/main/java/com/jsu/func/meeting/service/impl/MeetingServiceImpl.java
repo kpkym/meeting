@@ -5,6 +5,8 @@ import com.jsu.except.UserExceptJSON;
 import com.jsu.func.meeting.entity.Meeting;
 import com.jsu.func.meeting.mapper.MeetingMapper;
 import com.jsu.func.meeting.service.IMeetingService;
+import com.jsu.util.Dispatcher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -22,12 +24,16 @@ import java.util.stream.Collectors;
  */
 @Service
 public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting> implements IMeetingService {
+    @Autowired
+    Dispatcher dispatcher;
+
     @Override
     public boolean save(Meeting meeting) {
         if (conflict(meeting)) {
             throw new UserExceptJSON("该时间段存在会议安排");
         }
 
+        dispatcher.addMeeting(meeting);
         return super.save(meeting);
     }
 

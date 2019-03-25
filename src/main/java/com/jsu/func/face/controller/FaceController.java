@@ -66,7 +66,7 @@ public class FaceController {
     }
 
     @PostMapping("/faceSearch")
-    public Msg faceSearch(String face)
+    public Msg faceSearch(String face, Integer rid)
     		throws Exception {
 
         InputStream inputStream = new ByteArrayInputStream(Base64Utils.decodeFromString(face.trim()));
@@ -82,7 +82,7 @@ public class FaceController {
             throw new UserExceptJSON("未检出到人脸");
         }
         //人脸比对，获取比对结果
-        List<User> userFaceInfoList = faceEngineService.compareFaceFeature(bytes);
+        List<User> userFaceInfoList = faceEngineService.compareFaceFeature(bytes, rid);
 
         if (CollectionUtil.isNotEmpty(userFaceInfoList)) {
             User faceSearchResDto = userFaceInfoList.get(0);

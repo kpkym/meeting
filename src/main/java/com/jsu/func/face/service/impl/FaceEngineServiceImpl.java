@@ -5,6 +5,7 @@ import com.arcsoft.face.*;
 import com.arcsoft.face.enums.ImageFormat;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.jsu.except.UserExceptJSON;
 import com.jsu.func.face.base.ImageInfo;
 import com.jsu.func.face.dto.FaceUserInfo;
 import com.jsu.func.face.dto.ProcessInfo;
@@ -12,6 +13,8 @@ import com.jsu.func.face.factory.FaceEngineFactory;
 import com.jsu.func.face.service.FaceEngineService;
 import com.jsu.func.login.entity.User;
 import com.jsu.func.login.service.IUserService;
+import com.jsu.func.meeting.entity.Meeting;
+import com.jsu.func.meeting.service.IMeetingService;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -23,8 +26,10 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -53,6 +58,8 @@ public class FaceEngineServiceImpl implements FaceEngineService {
 
     @Autowired
     IUserService userService;
+    @Autowired
+    IMeetingService meetingService;
 
     @PostConstruct
     public void init() {
@@ -191,15 +198,24 @@ public class FaceEngineServiceImpl implements FaceEngineService {
      *特征匹配 
      */
     @Override
-    public List<User> compareFaceFeature(byte[] faceFeature)
+    public List<User> compareFaceFeature(byte[] faceFeature, Integer rid)
     		throws InterruptedException, ExecutionException {
         List<User> resultFaceInfoList = Lists.newLinkedList();//识别到的人脸列表
 
         FaceFeature targetFaceFeature = new FaceFeature();
         targetFaceFeature.setFeatureData(faceFeature);
 
-        List<User> users = userService.list();
-
+        List<Meeting> meetings = meetingService.list().stream()
+                .filter(e -> e.getRid().equals(rid) && new Date().after(e.getStart()) && new Date().before(e.getEnd()))
+                .collect(Collectors.toList());
+        if (meetings.isEmpty()) {
+            throw new UserExceptJSON("该会议室当前没有会议");
+        }
+        List<User> users = new ArrayList<>();
+        String[] uids = meetings.get(0).getUids().split("_");
+        for (String s : uids) {
+            users.add(userService.getById(Integer.valueOf(s)));
+        }
 
         List<List<User>> faceUserInfoPartList = Lists.partition(users, 1000);//分成1000一组，多线程处理
         CompletionService<List<User>> completionService = new ExecutorCompletionService<>(executorService);

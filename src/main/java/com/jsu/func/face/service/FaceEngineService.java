@@ -27,7 +27,7 @@ public interface FaceEngineService {
      * @param faceFeature
      * @return
      */
-    List<User> compareFaceFeature(byte[] faceFeature) throws InterruptedException, ExecutionException;
+    List<User> compareFaceFeature(byte[] faceFeature, Integer rid) throws InterruptedException, ExecutionException;
 
 
 
