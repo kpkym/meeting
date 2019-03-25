@@ -47,8 +47,6 @@ public class MeetingController {
         meeting.setHost((Integer) SessionUtil.getUid(session));
 
         service.save(meeting);
-
-
         return Msg.success();
     }
 

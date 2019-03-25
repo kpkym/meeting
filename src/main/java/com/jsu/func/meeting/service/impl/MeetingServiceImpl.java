@@ -34,7 +34,8 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting> impl
         }
 
         dispatcher.addMeeting(meeting);
-        return super.save(meeting);
+        // return super.save(meeting);
+        return true;
     }
 
     @Override
@@ -50,9 +51,7 @@ public class MeetingServiceImpl extends ServiceImpl<MeetingMapper, Meeting> impl
         Date start = meeting.getStart();
         Date end = meeting.getEnd();
         List<Meeting> collect = list().stream()
-                .filter(e -> {
-                    return e.getRid().equals(meeting.getRid()) && fmt.format(start).equals(fmt.format(e.getStart()));
-                })
+                .filter(e -> e.getRid().equals(meeting.getRid()) && fmt.format(start).equals(fmt.format(e.getStart())))
                 .collect(Collectors.toList());
 
         for (Meeting m : collect) {

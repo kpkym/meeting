@@ -31,7 +31,11 @@ public class UserController {
 
     @GetMapping("/getId")
     public Msg getId(HttpSession session) {
-        return Msg.success(SessionUtil.getUid(session));
+        Object uid = SessionUtil.getUid(session);
+        if (uid == null) {
+            throw new UserExceptJSON("未登陆");
+        }
+        return Msg.success(uid);
     }
 
     @GetMapping("/users/{id}")
