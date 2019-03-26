@@ -5,13 +5,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
-// @Component
+@Component
 @Slf4j
 @Aspect
 public class ControllerVerifyAOP {
-    @Pointcut("execution(* com.jsu.judge.controller..verify*(..))")
+    @Pointcut("execution(* com.jsu.func.face.controller.FaceController.*(..))")
     public void aspect() {
     }
 
