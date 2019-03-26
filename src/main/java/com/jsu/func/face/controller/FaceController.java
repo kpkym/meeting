@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 import java.util.List;
 
 
@@ -38,20 +37,18 @@ public class FaceController {
 
     @PostMapping("/register")
     public Msg register(User user, MultipartFile file) throws IOException, InterruptedException {
-            if (file == null) {
-                return Msg.failure("文件为空");
-            }
+        if (file == null) {
+            throw new UserExceptJSON("文件为空");
+        }
         InputStream inputStream = file.getInputStream();
-
-        String s = Base64.getEncoder().encodeToString(file.getBytes());
 
         ImageInfo imageInfo = ImageUtil.getRGBData(inputStream);
 
         //人脸特征获取
-            byte[] bytes = faceEngineService.extractFaceFeature(imageInfo);
-            if (bytes == null) {
-                throw new UserExceptJSON("未检出到人脸");
-            }
+        byte[] bytes = faceEngineService.extractFaceFeature(imageInfo);
+        if (bytes == null) {
+            throw new UserExceptJSON("未检出到人脸");
+        }
         try {
             user.setFace(bytes);
             //人脸特征插入到数据库
@@ -67,7 +64,7 @@ public class FaceController {
 
     @PostMapping("/faceSearch")
     public Msg faceSearch(String face, Integer rid)
-    		throws Exception {
+            throws Exception {
 
         InputStream inputStream = new ByteArrayInputStream(Base64Utils.decodeFromString(face.trim()));
         BufferedImage bufImage = ImageIO.read(inputStream);
@@ -93,7 +90,7 @@ public class FaceController {
                 int left = faceInfoList.get(0).getRect().getLeft();
                 int top = faceInfoList.get(0).getRect().getTop();
                 int width = faceInfoList.get(0).getRect().getRight() - left;
-                int height = faceInfoList.get(0).getRect().getBottom()- top;
+                int height = faceInfoList.get(0).getRect().getBottom() - top;
 
                 //描人脸框
                 Graphics2D graphics2D = bufImage.createGraphics();
@@ -112,7 +109,6 @@ public class FaceController {
         }
         throw new UserExceptJSON("人脸不匹配");
     }
-
 
 
     @PostMapping("/detectFaces")

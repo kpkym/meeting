@@ -53,12 +53,13 @@ public class MeetingController {
     @GetMapping("/meeting")
     public Msg list(HttpSession session) {
         Object uid = SessionUtil.getUid(session);
-        List<Meeting> collect = service.list().stream().filter(e -> e.getHost().equals(uid) || Arrays.asList(e.getUids().split("_")).contains(uid.toString()))
+        List<Meeting> collect = service.list().stream()
+                .filter(e -> e.getHost().equals(uid)
+                        || Arrays.asList(e.getUids().split("_")).contains(uid.toString()))
                 .peek(e -> {
                     e.setHoster(userService.getById(e.getHost()));
                     e.setRoom(roomService.getById(e.getRid()));
                     e.setParticipants(meetingUtil.participants(e.getUids()));
-                    // e.getRoom().setImg("");
                 })
                 .collect(Collectors.toList());
         return Msg.success(collect);
@@ -78,13 +79,13 @@ public class MeetingController {
     @GetMapping("/meetingTable")
     public Msg meetingTable(@DateTimeFormat(pattern="yyyy-MM-dd") Date date) {
         Map map = meetingUtil.meetingTable(date);
-        System.out.println("是是是");
         return Msg.success(map);
     }
 
 
     @GetMapping("/available")
-    public Msg available(@DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date start, @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date end) {
+    public Msg available(@DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date start
+            , @DateTimeFormat(pattern="yyyy-MM-dd HH:mm") Date end) {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         List<Meeting> collect = service.list().stream().filter(e -> fmt.format(start).equals(fmt.format(e.getStart())))
                 .collect(Collectors.toList());
@@ -99,7 +100,6 @@ public class MeetingController {
                 unAvaiableList.add(r);
             }
         }
-
         List<Room> rooms = roomService.list().stream().filter(e -> !unAvaiableList.contains(e))
                 .peek(e -> e.setImg(""))
                 .collect(Collectors.toList());

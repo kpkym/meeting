@@ -45,13 +45,13 @@ public class UserController {
 
     @GetMapping("/users")
     public Msg list(HttpSession session) {
-        List<User> list = service.list().stream().filter(e -> !e.getId().equals(session.getAttribute("uid"))).collect(Collectors.toList());
+        List<User> list = service.list().stream()
+                .filter(e -> !e.getId().equals(session.getAttribute("uid"))).collect(Collectors.toList());
         return Msg.success(list);
     }
 
     @PostMapping("/login")
     public Msg login(User user, HttpSession session) {
-        log.debug(session.getId());
         User login = service.login(user);
 
         if (login == null){
@@ -59,11 +59,6 @@ public class UserController {
         }
         SessionUtil.setUid(login.getId(), session);
         return Msg.success();
-    }
-
-    @PostMapping("/register")
-    public void register(User user) {
-        service.register(user);
     }
 
     @GetMapping("/logout")
